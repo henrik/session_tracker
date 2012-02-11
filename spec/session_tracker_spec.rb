@@ -50,7 +50,7 @@ describe SessionTracker, "active_users" do
       with("session_tracker_customer", 999_999_820, 1_000_000_000).
       and_return([ mock, mock ])
 
-    SessionTracker.new("customer", redis).active_users(time).should == 2
+    SessionTracker.new("customer", redis).count(time).should == 2
   end
 
 end

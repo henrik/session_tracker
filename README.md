@@ -28,7 +28,7 @@ In your ApplicationController:
 
 Then to view the current state:
 
-    SessionTracker.new("user", $redis).active_users
+    SessionTracker.new("user", $redis).count
 
 If redis is accessible through $redis, you don't have to give it as an argument to SessionTracker.new.
 

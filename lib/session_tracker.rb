@@ -20,9 +20,10 @@ class SessionTracker
     # Don't break the app we're embedded in if Redis goes down for a second.
   end
 
-  def active_users(time = Time.now)
+  def count(time = Time.now)
     # Count users with scores (last seen at) from 3 minutes ago up to now.
-    @redis.zrangebyscore(key, threshold(time), score(time)).length
+    users = @redis.zrangebyscore key, threshold(time), score(time)
+    users.length
   end
 
   private
@@ -30,7 +31,7 @@ class SessionTracker
   def truncate(time)
     # Remove users with scores (last seen at) from the beginning of time
     # until just before 3 minutes ago.
-    @redis.zremrangebyscore(key, "-inf", "(#{threshold(time)}")
+    @redis.zremrangebyscore key, "-inf", "(#{threshold(time)}"
   end
 
   def truncate?
