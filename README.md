@@ -1,6 +1,6 @@
 # SessionTracker
 
-Track active sessions in redis.
+Track active sessions in Redis.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Then to view the current state:
 
     SessionTracker.new("user", $redis).count
 
-If redis is accessible through $redis, you don't have to give it as an argument to SessionTracker.new.
+If Redis is accessible through $redis, you don't have to give it as an argument to SessionTracker.new.
 
 Read the spec and/or code to see how it works.
 

@@ -2,7 +2,8 @@ require 'time'
 
 class SessionTracker
 
-  THRESHOLD = 3 * 60  # 3 minutes
+  # 5 minutes. Same as Google Analytics.
+  THRESHOLD = 5 * 60
 
   def initialize(type, redis = $redis)
     @type = type
@@ -21,7 +22,7 @@ class SessionTracker
   end
 
   def count(time = Time.now)
-    # Count users with scores (last seen at) from 3 minutes ago up to now.
+    # Count users with scores (last seen at) from N minutes ago up to now.
     users = @redis.zrangebyscore key, threshold(time), score(time)
     users.length
   end
@@ -30,7 +31,7 @@ class SessionTracker
 
   def truncate(time)
     # Remove users with scores (last seen at) from the beginning of time
-    # until just before 3 minutes ago.
+    # until just before N minutes ago.
     @redis.zremrangebyscore key, "-inf", "(#{threshold(time)}"
   end
 

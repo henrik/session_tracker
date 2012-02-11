@@ -13,7 +13,7 @@ describe SessionTracker, "track" do
 
   it "should truncate old items from the set every now and then" do
     time = Time.at(1_000_000_000)
-    redis.should_receive(:zremrangebyscore).with("session_tracker_customer", "-inf", "(999999820")
+    redis.should_receive(:zremrangebyscore).with("session_tracker_customer", "-inf", "(999999700")
     tracker = SessionTracker.new("customer", redis)
     tracker.stub!(:truncate?).and_return(true)
     tracker.track("abc123", time)
@@ -47,7 +47,7 @@ describe SessionTracker, "active_users" do
   it "should get a count by timestamp range" do
     time = Time.at(1_000_000_000)
     redis.should_receive(:zrangebyscore).
-      with("session_tracker_customer", 999_999_820, 1_000_000_000).
+      with("session_tracker_customer", 999_999_700, 1_000_000_000).
       and_return([ mock, mock ])
 
     SessionTracker.new("customer", redis).count(time).should == 2
