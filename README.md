@@ -44,9 +44,15 @@ Read the spec and/or code to see how it works.
 
 ## Credits and license
 
-Inspired by [http://www.lukemelia.com/blog/archives/2010/01/17/redis-in-practice-whos-online/](http://www.lukemelia.com/blog/archives/2010/01/17/redis-in-practice-whos-online/).
+By [Joakim Kolsjö](https://github.com/joakimk).
 
-By [Joakim Kolsjö](https://github.com/joakimk) under the MIT license:
+Originally inspired by [http://www.lukemelia.com/blog/archives/2010/01/17/redis-in-practice-whos-online/](http://www.lukemelia.com/blog/archives/2010/01/17/redis-in-practice-whos-online/).
+
+Contributors:
+
+* [Henrik Nyh](http://henrik.nyh.se)
+
+Released under the MIT license:
 
 >  Copyright (c) 2012 Joakim Kolsjö
 >

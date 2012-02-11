@@ -1,39 +1,39 @@
 require 'session_tracker'
 
 describe SessionTracker, "track" do
-  
+
   let(:redis) { mock.as_null_object }
 
-  it "should store the user in a set for the current minute" do
-    time = Time.parse("15:04")
-    redis.should_receive(:sadd).with("active_customer_sessions_minute_04", "abc123")
+  it "should store the user in a sorted set scored by timestamp" do
+    time = Time.at(1_000_000_000)
+    redis.should_receive(:zadd).with("session_tracker_customer", 1_000_000_000, "abc123")
     tracker = SessionTracker.new("customer", redis)
     tracker.track("abc123", time)
   end
 
-  it "should expire the set within an hour to prevent it wrapping around" do
-    time = Time.parse("15:59")
-    redis.should_receive(:expire).with("active_customer_sessions_minute_59", 60 * 59)
+  it "should truncate old items from the set every now and then" do
+    time = Time.at(1_000_000_000)
+    redis.should_receive(:zremrangebyscore).with("session_tracker_customer", "-inf", "(999999820")
     tracker = SessionTracker.new("customer", redis)
+    tracker.stub!(:truncate?).and_return(true)
     tracker.track("abc123", time)
   end
 
   it "should be able to track different types of sessions" do
-    time = Time.parse("15:04")
-    redis.should_receive(:sadd).with("active_employee_sessions_minute_04", "abc456")
+    time = Time.at(1_000_000_000)
+    redis.should_receive(:zadd).with("session_tracker_employee", 1_000_000_000, "abc456")
     tracker = SessionTracker.new("employee", redis)
     tracker.track("abc456", time)
   end
 
   it "should do nothing if the session id is nil" do
-    redis.should_not_receive(:sadd)
-    redis.should_not_receive(:expire)
+    redis.should_not_receive(:zadd)
     tracker = SessionTracker.new("employee", redis)
     tracker.track(nil)
   end
 
   it "should not raise any errors" do
-    redis.should_receive(:expire).and_raise('fail')
+    redis.should_receive(:zadd).and_raise('fail')
     tracker = SessionTracker.new("customer", redis)
     tracker.track("abc123", Time.now)
   end
@@ -44,12 +44,11 @@ describe SessionTracker, "active_users" do
 
   let(:redis) { mock.as_null_object }
 
-  it "should do a union on the last 3 minutes to get a active user count" do
-    time = Time.parse("13:09")
-    redis.should_receive(:sunion).with("active_customer_sessions_minute_09",
-                                       "active_customer_sessions_minute_08",
-                                       "active_customer_sessions_minute_07").
-                                       and_return([ mock, mock ])
+  it "should get a count by timestamp range" do
+    time = Time.at(1_000_000_000)
+    redis.should_receive(:zrangebyscore).
+      with("session_tracker_customer", 999_999_820, 1_000_000_000).
+      and_return([ mock, mock ])
 
     SessionTracker.new("customer", redis).active_users(time).should == 2
   end
