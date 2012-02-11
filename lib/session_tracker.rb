@@ -11,20 +11,25 @@ class SessionTracker
 
   def track(id, time = Time.now)
     return unless id
+    # Add user id to a sorted set with the last-seen timestamp as score.
+    # If they're already in there, update the timestamp.
     @redis.zadd key, time.to_i, id
+    # Truncate the set once every 100 trackings or so.
     truncate(time) if truncate?
   rescue
-    # This is called for every request and is probably not essential for the app
-    # so we don't want to raise errors just because redis is down for a few seconds.
+    # Don't break the app we're embedded in if Redis goes down for a second.
   end
 
   def active_users(time = Time.now)
+    # Count users with scores (last seen at) from 3 minutes ago up to now.
     @redis.zrangebyscore(key, threshold(time), score(time)).length
   end
 
   private
 
   def truncate(time)
+    # Remove users with scores (last seen at) from the beginning of time
+    # until just before 3 minutes ago.
     @redis.zremrangebyscore(key, "-inf", "(#{threshold(time)}")
   end
 
